@@ -73,7 +73,7 @@
 
   <div class="card"><div id="log">Log…</div></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+  <script src="vendor/ethers.umd.min.js"></script>
   <script>
   const CONTRACT = '0x74a404da754a80818c7c896de13c74f6ac17f6a3';
   const EXPECTED_OWNER = '0xF159CD2739E76fcbA210cB22Ac34cc39a9D4Bd87';
@@ -89,35 +89,113 @@
     'function ownerMint(address to, uint256 quantity)'
   ];
 
-  let provider, signer, contract, isOwner=false;
+  let provider, signer, contract, isOwner=false, injected=null;
   const logEl = document.getElementById('log');
   const log = (m) => { logEl.textContent += '\n' + m; logEl.scrollTop = logEl.scrollHeight; };
   const short = (a) => a ? a.slice(0,6)+'…'+a.slice(-4) : '—';
   const eq = (a,b) => (a||'').toLowerCase() === (b||'').toLowerCase();
 
-  async function ensureBsc() {
+  function pickInjected() {
+    if (window.ethereum) return window.ethereum;
+    if (window.BinanceChain) return window.BinanceChain;
+    if (window.binancew3w && window.binancew3w.ethereum) return window.binancew3w.ethereum;
+    if (window.binance && window.binance.ethereum) return window.binance.ethereum;
+    return null;
+  }
+
+  function eip6963Provider() {
+    return new Promise((resolve) => {
+      let done = false;
+      const finish = (p) => { if (done) return; done = true; resolve(p || null); };
+      const onAnnounce = (event) => {
+        try {
+          const detail = event && event.detail;
+          const p = detail && detail.provider;
+          if (p) finish(p);
+        } catch (_) {}
+      };
+      window.addEventListener('eip6963:announceProvider', onAnnounce);
+      try { window.dispatchEvent(new Event('eip6963:requestProvider')); } catch (_) {}
+      setTimeout(() => {
+        window.removeEventListener('eip6963:announceProvider', onAnnounce);
+        finish(null);
+      }, 400);
+    });
+  }
+
+  async function waitForInjected(timeoutMs) {
+    const t0 = Date.now();
+    let p = pickInjected();
+    if (p) return p;
+    p = await eip6963Provider();
+    if (p) return p;
+    return await new Promise((resolve, reject) => {
+      const onInit = () => {
+        const q = pickInjected();
+        if (q) { cleanup(); resolve(q); }
+      };
+      const cleanup = () => {
+        clearInterval(iv);
+        clearTimeout(to);
+        window.removeEventListener('ethereum#initialized', onInit);
+      };
+      window.addEventListener('ethereum#initialized', onInit);
+      const iv = setInterval(() => {
+        const q = pickInjected();
+        if (q) { cleanup(); resolve(q); }
+      }, 100);
+      const to = setTimeout(() => {
+        cleanup();
+        reject(new Error('No wallet found. Open this page in Binance Web3 / MetaMask / Trust in-app browser.'));
+      }, timeoutMs || 4000);
+    });
+  }
+
+  async function ensureBsc(eth) {
     try {
-      await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId:'0x38' }] });
+      await eth.request({ method:'wallet_switchEthereumChain', params:[{ chainId:'0x38' }] });
     } catch (e) {
-      if (e && (e.code === 4902 || String(e.message||'').includes('Unrecognized'))) {
-        await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{
-          chainId:'0x38', chainName:'BNB Smart Chain',
-          nativeCurrency:{ name:'BNB', symbol:'BNB', decimals:18 },
-          rpcUrls:['https://bsc-dataseed.binance.org/'],
-          blockExplorerUrls:['https://bscscan.com/']
-        }]});
-      } else { throw e; }
+      const code = e && e.code;
+      const msg = String((e && e.message) || '');
+      if (code === 4902 || msg.includes('Unrecognized') || msg.includes('not added')) {
+        try {
+          await eth.request({ method:'wallet_addEthereumChain', params:[{
+            chainId:'0x38', chainName:'BNB Smart Chain',
+            nativeCurrency:{ name:'BNB', symbol:'BNB', decimals:18 },
+            rpcUrls:['https://bsc-dataseed.binance.org/'],
+            blockExplorerUrls:['https://bscscan.com/']
+          }]});
+        } catch (e2) {
+          log('Add BSC: ' + (e2.message || e2));
+        }
+      } else {
+        // Binance Discover often throws even when already on BSC — do not abort connect.
+        log('Switch to BSC: ' + msg);
+      }
     }
   }
 
   async function connect() {
     try {
-      if (!window.ethereum) throw new Error('No wallet found. Open this page in Binance Web3 / MetaMask / Trust in-app browser.');
-      await ensureBsc();
-      provider = new ethers.BrowserProvider(window.ethereum);
+      if (typeof ethers === 'undefined') throw new Error('ethers.js failed to load');
+      injected = await waitForInjected(5000);
+      // Request accounts first (required by many mobile wallets before switch).
+      provider = new ethers.BrowserProvider(injected);
       await provider.send('eth_requestAccounts', []);
+      await ensureBsc(injected);
+      // Refresh provider after possible chain switch.
+      provider = new ethers.BrowserProvider(injected);
       const net = await provider.getNetwork();
-      if (Number(net.chainId) !== 56) throw new Error('Could not switch to BSC (chainId 56). Try again.');
+      const chainId = Number(net.chainId);
+      if (chainId !== 56) {
+        // One more soft retry, then hard fail.
+        await ensureBsc(injected);
+        provider = new ethers.BrowserProvider(injected);
+        const net2 = await provider.getNetwork();
+        if (Number(net2.chainId) !== 56) {
+          throw new Error('Could not switch to BSC (chainId 56). Try again.');
+        }
+      }
       signer = await provider.getSigner();
       const addr = await signer.getAddress();
       document.getElementById('connected').textContent = addr;
@@ -125,6 +203,9 @@
       const onchainOwner = await contract.owner();
       isOwner = eq(addr, EXPECTED_OWNER) && eq(addr, onchainOwner);
       document.getElementById('ownerGate').style.display = isOwner ? 'none' : 'block';
+      if (!isOwner) {
+        document.getElementById('ownerGate').innerHTML = 'Wrong wallet. Open this page with the owner address <b>0xF159…4Bd87</b> (Binance Web3 / MetaMask / Trust in-app browser).';
+      }
       document.getElementById('btn1').disabled = !isOwner;
       document.getElementById('btn2').disabled = !isOwner;
       document.getElementById('btn3').disabled = !isOwner;
@@ -152,7 +233,6 @@
         const diff = await cRead.difficultyTarget();
         const paid = await cRead.paidMintActive();
         const owned = await cRead.balanceOf(EXPECTED_OWNER);
-        // Smaller target = harder. Need ease when current target is below the easy target.
         if (diff < BigInt(DIFF_TARGET)) {
           try { totalGas += await contract.setDifficulty.estimateGas(DIFF_TARGET); } catch (_) { totalGas += 60000n; }
         }
@@ -178,7 +258,6 @@
     const [diff, paid, owned, minted] = await Promise.all([
       read.difficultyTarget(), read.paidMintActive(), read.balanceOf(EXPECTED_OWNER), read.ownerMinted()
     ]);
-    // Larger target = easier mining. Done when target is at least as easy as DIFF_TARGET.
     const easy = diff >= BigInt(DIFF_TARGET);
     document.getElementById('stDiff').innerHTML = easy ? '<span class="tick">✓ easy</span>' : ('still hard');
     document.getElementById('stPaid').innerHTML = paid ? '<span class="tick">✓ ON</span>' : 'OFF';
@@ -220,6 +299,7 @@
 
   (async () => {
     try {
+      if (typeof ethers === 'undefined') throw new Error('ethers.js failed to load');
       provider = new ethers.JsonRpcProvider('https://bsc-dataseed.binance.org/', 56);
       await refreshState();
       const bal = await provider.getBalance(EXPECTED_OWNER);
@@ -228,7 +308,7 @@
     } catch (e) { log('init: ' + (e.message || e)); }
   })();
 
-  window.__OWNER_PAGE__ = { CONTRACT, EXPECTED_OWNER, DIFF_TARGET, ABI };
+  window.__OWNER_PAGE__ = { CONTRACT, EXPECTED_OWNER, DIFF_TARGET, ABI, pickInjected, waitForInjected, ensureBsc };
   </script>
 </body>
 </html>

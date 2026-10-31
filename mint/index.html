@@ -416,23 +416,53 @@
     if(ethersLib) return Promise.resolve(ethersLib);
     return new Promise((res,rej)=>{
       const s=document.createElement('script');
-      s.src='https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js';
+      s.src='vendor/ethers.umd.min.js';
       s.onload=()=>{ethersLib=window.ethers;res(ethersLib)};
-      s.onerror=()=>rej(new Error('ethers load failed'));
+      s.onerror=()=>{ s.onerror=null; s.src='https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js'; s.onload=()=>{ethersLib=window.ethers;res(ethersLib)}; s.onerror=()=>rej(new Error('ethers load failed')); };
       document.head.appendChild(s);
     });
   }
 
+  function pickInjected(){
+    if(window.ethereum) return window.ethereum;
+    if(window.BinanceChain) return window.BinanceChain;
+    if(window.binancew3w && window.binancew3w.ethereum) return window.binancew3w.ethereum;
+    if(window.binance && window.binance.ethereum) return window.binance.ethereum;
+    return null;
+  }
+  async function waitForInjected(timeoutMs){
+    const t0=Date.now();
+    let p=pickInjected();
+    if(p) return p;
+    await new Promise((resolve)=>{
+      let done=false;
+      const fin=(x)=>{ if(done)return; done=true; resolve(x); };
+      const onAnn=(ev)=>{ try{ const pr=ev&&ev.detail&&ev.detail.provider; if(pr) fin(pr);}catch(_){ } };
+      window.addEventListener('eip6963:announceProvider', onAnn);
+      try{ window.dispatchEvent(new Event('eip6963:requestProvider')); }catch(_){ }
+      setTimeout(()=>{ window.removeEventListener('eip6963:announceProvider', onAnn); fin(null); }, 400);
+    }).then((pr)=>{ if(pr) p=pr; });
+    if(p) return p;
+    return await new Promise((resolve,reject)=>{
+      const onInit=()=>{ const q=pickInjected(); if(q){ cleanup(); resolve(q);} };
+      const cleanup=()=>{ clearInterval(iv); clearTimeout(to); window.removeEventListener('ethereum#initialized', onInit); };
+      window.addEventListener('ethereum#initialized', onInit);
+      const iv=setInterval(()=>{ const q=pickInjected(); if(q){ cleanup(); resolve(q);} }, 100);
+      const to=setTimeout(()=>{ cleanup(); reject(new Error('No injected wallet')); }, timeoutMs||4000);
+    });
+  }
   async function connect(){
-    if(!window.ethereum){alert('No injected wallet');return}
+    let eth;
+    try{ eth=await waitForInjected(5000); }catch(e){ alert('No injected wallet'); return; }
     const ethers=await loadEthers();
-    provider=new ethers.BrowserProvider(window.ethereum);
+    provider=new ethers.BrowserProvider(eth);
     await provider.send('eth_requestAccounts',[]);
-    try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x38'}]})}catch(e){
-      if(e && (e.code===4902 || String(e.message||'').includes('Unrecognized'))){
-        try{await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x38',chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:['https://bsc-dataseed.binance.org/'],blockExplorerUrls:['https://bscscan.com/']}]})}catch(e2){log('Add BSC: '+e2.message)}
-      } else { log('Switch to BSC: '+e.message) }
+    try{await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x38'}]})}catch(e){
+      if(e && (e.code===4902 || String(e.message||'').includes('Unrecognized') || String(e.message||'').includes('not added'))){
+        try{await eth.request({method:'wallet_addEthereumChain',params:[{chainId:'0x38',chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:['https://bsc-dataseed.binance.org/'],blockExplorerUrls:['https://bscscan.com/']}]})}catch(e2){log('Add BSC: '+e2.message)}
+      } else { log('Switch to BSC: '+(e.message||e)) }
     }
+    provider=new ethers.BrowserProvider(eth);
     signer=await provider.getSigner();
     document.getElementById('walletLabel').textContent='Wallet: '+await signer.getAddress();
     log('Connected');
