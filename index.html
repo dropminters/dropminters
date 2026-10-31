@@ -302,15 +302,30 @@
     document.getElementById('mintProgressBar').style.width='0%';
   }
 
-  function copyText(t, el, ok){
-    const done=()=>{el.textContent=ok||'Copied'; setTimeout(()=>{el.textContent='';},2200)};
+  function fallbackCopy(t){
+    const ta=document.createElement('textarea');
+    ta.value=t; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.left='-9999px';
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, ta.value.length);
+    let ok=false;
+    try{ ok=document.execCommand('copy'); }catch(e){ ok=false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyText(t, el, okMsg){
+    const done=()=>{el.textContent=okMsg||'Copied'; setTimeout(()=>{el.textContent='';},2200)};
+    const fail=()=>{
+      // Last resort: select prompt box so user can copy manually
+      const box=document.getElementById('promptBox');
+      if(box){
+        const range=document.createRange(); range.selectNodeContents(box);
+        const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      }
+      el.textContent='Select + copy the prompt above';
+    };
     if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(t).then(done).catch(()=>{el.textContent='Copy failed — select the prompt manually';});
+      navigator.clipboard.writeText(t).then(done).catch(()=>{ if(fallbackCopy(t)) done(); else fail(); });
     } else {
-      try{
-        const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select();
-        document.execCommand('copy'); document.body.removeChild(ta); done();
-      }catch(e){el.textContent='Copy failed — select the prompt manually';}
+      if(fallbackCopy(t)) done(); else fail();
     }
   }
 
