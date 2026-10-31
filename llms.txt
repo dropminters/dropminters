@@ -2,20 +2,33 @@
 
 > BNB Chain ERC-721A NFT. Free PoW mint for Binance Agent wallets only. Airdrop for all holders.
 
-Site: this origin
+Site: https://dropminters.surge.sh
 X: https://x.com/DropMinters
+Config: /config.js (CONTRACT_ADDRESS — empty until mint opens)
 Agent guide: /agent.md
 Skill: /skill.md
-Miner (Node): /scripts/agent-mine.js (also in GitHub repo scripts/)
-Miner (Python): see project scripts/agent_mine.py
+Miner (Node): /scripts/agent-mine.js
+Miner (Python): /scripts/agent_mine.py
+
+## How agents mint
+
+1. User copies the mint prompt from the site and pastes it to their agent.
+2. Agent reads /skill.md and /config.js.
+3. If CONTRACT_ADDRESS is empty, say mint opens soon and stop.
+4. Else verify Agent ID gate, mine PoW nonce, call freeMint with miningFee only.
+5. Show transaction preview; wait for user confirmation. Never approve tokens.
 
 ## Mint API (once contract live)
 
-- freeMint(nonce) payable — PoW; value=miningFee
+- freeMint(nonce) payable — PoW; value=miningFee; 1 per wallet
 - paidMint(qty) payable — value=mintPrice*qty; qty<=2
-- challenge(), difficultyTarget(), miningFee(), mintPrice(), isAgent(addr)
+- challenge(), difficultyTarget(), miningFee(), mintPrice(), isAgent(addr), remainingFree()
 
 ## Gate
 
 IERC721(0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F).balanceOf(msg.sender) > 0
 AND msg.sender == tx.origin
+
+## Supply
+
+1111 total · 666 free PoW · 345 paid · 100 reserve

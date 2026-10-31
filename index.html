@@ -4,21 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DropMinters — Free PoW Mint for Binance Agent Wallets</title>
-  <meta name="description" content="DropMinters: mine a free NFT with proof-of-work on BNB Chain. Only Binance Agent wallets can mint. All holders will receive a future airdrop." />
+  <meta name="description" content="DropMinters: mine a free NFT with proof-of-work on BNB Chain. Only Binance Agent wallets can mint. Copy a prompt to your AI agent. All holders get a future airdrop." />
   <meta property="og:title" content="DropMinters" />
   <meta property="og:image" content="assets/webp/banner.webp" />
   <link rel="icon" href="assets/webp/favicon.webp" type="image/webp" />
   <link rel="preload" as="image" href="assets/webp/logo.webp" />
+  <script src="./config.js"></script>
   <style>
-    :root{--bg:#070b16;--card:#10182a;--line:#24314d;--text:#eef3ff;--muted:#93a0bf;--gold:#f3ba2f;--cyan:#3cf0c5}
+    :root{--bg:#070b16;--card:#10182a;--line:#24314d;--text:#eef3ff;--muted:#93a0bf;--gold:#f3ba2f;--cyan:#3cf0c5;--lime:#7dffb3}
     *{box-sizing:border-box}html{scroll-behavior:smooth}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);background:var(--bg);background-image:radial-gradient(800px 420px at 10% -10%,#1a2a55,transparent 60%)}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);background:var(--bg);background-image:radial-gradient(800px 420px at 10% -10%,#1a2a55,transparent 60%),radial-gradient(600px 360px at 90% 10%,rgba(60,240,197,.08),transparent 55%)}
     a{color:var(--cyan);text-decoration:none}.wrap{max-width:960px;margin:0 auto;padding:0 16px}
     nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(10px);background:rgba(7,11,22,.82);border-bottom:1px solid var(--line)}
     nav .inner{display:flex;align-items:center;justify-content:space-between;padding:10px 0;gap:10px}
     .brand{display:flex;align-items:center;gap:8px;font-weight:800}.brand img{width:32px;height:32px;border-radius:8px}
-    .btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;background:var(--gold);color:#111}
+    .btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;background:var(--gold);color:#111;font:inherit}
     .btn.cyan{background:var(--cyan);color:#05241c}.btn.ghost{background:#1a243a;color:var(--text);border:1px solid var(--line)}
+    .btn.lg{padding:14px 20px;letter-spacing:.02em;font-size:.95rem}
     .btn:disabled{opacity:.55;cursor:not-allowed}
     .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;align-items:center;padding:36px 0 20px}
     @media(max-width:800px){.hero{grid-template-columns:1fr}}
@@ -29,13 +31,14 @@
     .hero-card{overflow:hidden;padding:0}.hero-card .banner{width:100%;height:150px;object-fit:cover;display:block}
     .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px}
     .gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#0a1020;border:1px solid var(--line)}
-    section{padding:28px 0}h2{font-size:1.35rem;margin:0 0 12px}
+    section{padding:28px 0}h2{font-size:1.35rem;margin:0 0 12px}h3{margin:0 0 8px;font-size:1rem}
     .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}@media(max-width:800px){.grid3{grid-template-columns:1fr}}
     .stat{font-size:1.5rem;font-weight:800;color:var(--gold)}
     .warn,.okbox{border-radius:12px;padding:12px 14px;line-height:1.45;margin-top:10px}
     .warn{background:rgba(243,186,47,.08);border:1px solid rgba(243,186,47,.35);color:#ffe29a}
     .okbox{background:rgba(60,240,197,.08);border:1px solid rgba(60,240,197,.3);color:#bffcf0}
     .soon{display:inline-block;margin-top:8px;padding:7px 11px;border-radius:999px;background:#2a1f0a;color:var(--gold);border:1px solid rgba(243,186,47,.4);font-weight:700;font-size:.82rem}
+    .live{display:none;margin-top:8px;padding:7px 11px;border-radius:999px;background:#0a2a22;color:var(--lime);border:1px solid rgba(125,255,179,.4);font-weight:700;font-size:.82rem}
     input{width:100%;background:#0a1020;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px}
     label{font-size:.78rem;color:var(--muted)}#log{font-family:ui-monospace,monospace;font-size:.75rem;background:#070d18;border:1px solid var(--line);border-radius:10px;padding:10px;max-height:140px;overflow:auto;white-space:pre-wrap;color:#b7c3df}
     .faq details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:6px}
@@ -43,14 +46,34 @@
     footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--muted);font-size:.88rem}
     .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
     code{font-size:.85em}
+    .agent-hero{position:relative;overflow:hidden;border:1px solid rgba(243,186,47,.35);background:linear-gradient(165deg,#121c33 0%,#0d1528 55%,#10182a 100%);box-shadow:0 0 0 1px rgba(60,240,197,.08),0 18px 50px rgba(0,0,0,.35)}
+    .agent-hero::before{content:"";position:absolute;inset:-40% auto auto -20%;width:280px;height:280px;background:radial-gradient(circle,rgba(243,186,47,.18),transparent 65%);pointer-events:none}
+    .agent-kicker{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin:0 0 8px}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+    @media(max-width:700px){.steps{grid-template-columns:1fr}}
+    .step{background:rgba(7,13,24,.65);border:1px solid var(--line);border-radius:12px;padding:12px}
+    .step .n{display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;background:var(--gold);color:#111;font-size:.75rem;font-weight:800;margin-bottom:6px}
+    .step p{margin:0;color:var(--muted);font-size:.88rem;line-height:1.4}
+    .prompt-box{background:#070d18;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;line-height:1.55;color:#c9d6f5;white-space:pre-wrap;word-break:break-word;max-height:220px;overflow:auto;margin:10px 0 0}
+    .copy-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+    .copied{font-size:.82rem;color:var(--lime);font-weight:700;min-height:1.2em}
+    .price-rows{margin-top:8px}
+    .price-rows .pr{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.92rem}
+    .price-rows .pr:last-child{border-bottom:0}
+    .price-rows .pr span:first-child{color:var(--muted)}
+    .price-rows .pr span:last-child{font-family:ui-monospace,monospace;font-weight:700;color:var(--text)}
+    .addr{font-family:ui-monospace,monospace;font-size:.78rem;word-break:break-all;color:var(--text)}
+    .bar{height:10px;background:#0a1020;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:10px 0 8px}
+    .bar>div{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .5s ease}
+    .bar-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
   </style>
 </head>
 <body>
   <nav><div class="wrap inner">
     <div class="brand"><img src="assets/webp/logo.webp" width="32" height="32" alt="DropMinters" /> DropMinters</div>
     <div class="row" style="margin:0">
-      <a class="btn ghost" href="#mint" style="padding:8px 12px;font-size:.85rem">Mint</a>
-      <a class="btn ghost" href="/agent.md" style="padding:8px 12px;font-size:.85rem">AI agents</a>
+      <a class="btn ghost" href="#agent" style="padding:8px 12px;font-size:.85rem">AI Agent</a>
+      <a class="btn ghost" href="#mint" style="padding:8px 12px;font-size:.85rem">Browser</a>
       <a class="btn ghost" href="https://x.com/DropMinters" target="_blank" rel="noopener" style="padding:8px 12px;font-size:.85rem">X</a>
     </div>
   </div></nav>
@@ -59,10 +82,11 @@
     <div>
       <span class="pill">BNB Chain</span><span class="pill">1111 unique</span><span class="pill">PoW free</span><span class="pill">Agent-gated</span>
       <h1>Mine your <span>DropMinter</span></h1>
-      <p class="lead"><b>Only Binance Agent wallets can mint.</b> Solve a tiny proof-of-work hash to mint free.
-      <b>All DropMinters holders (free and paid mint) will receive a future airdrop from the creator.</b></p>
-      <div class="row"><a class="btn" href="#mint">Start mining</a><a class="btn ghost" href="#agent">AI Agent Mint</a></div>
+      <p class="lead"><b>Only Binance Agent wallets can mint.</b> Copy one prompt to your AI agent — or mine in the browser.
+      <b>All DropMinters holders (free and paid) will receive a future airdrop from the creator.</b></p>
+      <div class="row"><a class="btn lg" href="#agent">Mint via AI agent</a><a class="btn ghost" href="#mint">Browser miner</a></div>
       <div class="soon" id="heroSoon">Mint opens soon — contract not live yet</div>
+      <div class="live" id="heroLive">Mint is live</div>
     </div>
     <div class="card hero-card">
       <img class="banner" src="assets/webp/banner.webp" width="1200" height="400" alt="DropMinters" fetchpriority="high" />
@@ -83,11 +107,59 @@
     </div>
   </header>
 
+  <section class="wrap" id="progress">
+    <div class="card">
+      <h3 style="color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-size:.78rem">Supply</h3>
+      <div class="bar"><div id="mintProgressBar"></div></div>
+      <div class="bar-meta">
+        <span id="mintProgressText">0 / 1111 minted</span>
+        <span id="mintProgressPct">0.0%</span>
+        <span id="mintRemaining">Remaining: 1111</span>
+      </div>
+      <div class="price-rows">
+        <div class="pr"><span>Free PoW (1 per Agent wallet)</span><span>0.0003 BNB fee</span></div>
+        <div class="pr"><span>Paid mint (max 2 / wallet)</span><span>0.003 BNB</span></div>
+        <div class="pr"><span>Reserve (disclosed ownerMint)</span><span>100</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="agent">
+    <h2>Mint via AI agent</h2>
+    <div class="card agent-hero">
+      <p class="agent-kicker">Recommended · Binance Agentic Wallet</p>
+      <h3 style="font-size:1.25rem;margin-bottom:6px">Copy the prompt. Paste it to your agent. Confirm the preview.</h3>
+      <p style="color:var(--muted);line-height:1.5;margin:0">No seed phrase on this site. Your agent reads our skill, checks Agent ID, mines the PoW nonce, and submits <code>freeMint</code> — you approve the preview.</p>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><p>Tap <b>Copy mint prompt</b></p></div>
+        <div class="step"><div class="n">2</div><p>Paste into your AI agent / Binance agent wallet</p></div>
+        <div class="step"><div class="n">3</div><p>Review the tx preview, then confirm in wallet</p></div>
+      </div>
+      <div class="soon" id="agentSoon">Mint opens soon — prompt still works; agent will wait until contract is live</div>
+      <div class="live" id="agentLive">Contract live — agent can mint now</div>
+      <div class="prompt-box" id="promptBox" aria-live="polite"></div>
+      <div class="copy-row">
+        <button class="btn lg" type="button" id="copyMintPrompt">Copy mint prompt</button>
+        <button class="btn ghost" type="button" id="copySkillLink">Copy skill URL</button>
+        <span class="copied" id="mintPromptCopied"></span>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <a class="btn cyan" href="/skill.md">skill.md</a>
+        <a class="btn ghost" href="/agent.md">agent.md</a>
+        <a class="btn ghost" href="/llms.txt">llms.txt</a>
+        <a class="btn ghost" href="/config.js">config.js</a>
+        <a class="btn ghost" href="/scripts/agent-mine.js">agent-mine.js</a>
+      </div>
+      <div class="okbox" style="margin-top:14px"><b>Airdrop:</b> All DropMinters holders (free and paid mint) will receive a future airdrop from the creator.</div>
+      <div class="warn"><b>Gate:</b> Agent ID NFT <span class="addr" id="gateAddr">0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F</span> · EOA only · No token approvals ever</div>
+    </div>
+  </section>
+
   <section class="wrap" id="how">
     <h2>How mining works</h2>
     <div class="grid3">
-      <div class="card"><h3>1. Agent wallet</h3><p style="color:var(--muted);margin:0;line-height:1.45">Connect a Binance Agentic Wallet with SPACE ID Agent ID (.ai). Contracts cannot mint.</p></div>
-      <div class="card"><h3>2. Mine nonce</h3><p style="color:var(--muted);margin:0;line-height:1.45">Browser or AI agent finds <code>nonce</code> so <code>keccak256(minter, nonce, challenge)</code> beats the target.</p></div>
+      <div class="card"><h3>1. Agent wallet</h3><p style="color:var(--muted);margin:0;line-height:1.45">Use a Binance Agentic Wallet with SPACE ID Agent ID (.ai). Contracts cannot mint.</p></div>
+      <div class="card"><h3>2. Mine nonce</h3><p style="color:var(--muted);margin:0;line-height:1.45">Agent or browser finds <code>nonce</code> so <code>keccak256(minter, nonce, challenge)</code> beats the target.</p></div>
       <div class="card"><h3>3. Mint</h3><p style="color:var(--muted);margin:0;line-height:1.45">Call <code>freeMint(nonce)</code>. Pay mining fee (default 0.0003 BNB) + gas.</p></div>
     </div>
   </section>
@@ -99,36 +171,30 @@
       <div class="card"><div class="stat">345</div><h3>Paid</h3><p style="color:var(--muted);margin:0">0.003 BNB · max 2 / wallet</p></div>
       <div class="card"><div class="stat">100</div><h3>Reserve</h3><p style="color:var(--muted);margin:0">Disclosed ownerMint for treasury</p></div>
     </div>
-    <div class="okbox"><b>Airdrop:</b> All DropMinters holders (free and paid mint) will receive a future airdrop from the creator.</div>
-    <div class="warn"><b>Gate:</b> Agent ID NFT <code>0x60B926…022F</code> on BSC + EOA only. Royalty 5%.</div>
   </section>
 
-  <section class="wrap" id="agent">
-    <h2>AI Agent Mint</h2>
+  <section class="wrap" id="contracts">
+    <h2>Contracts</h2>
     <div class="card">
-      <p style="color:var(--muted);line-height:1.5;margin:0 0 10px">Built for AI agents (Binance Agentic Wallet / <code>baw</code>). Read the machine guide, mine offline, then submit one tx.</p>
-      <div class="row">
-        <a class="btn cyan" href="/agent.md">agent.md</a>
-        <a class="btn ghost" href="/llms.txt">llms.txt</a>
-        <a class="btn ghost" href="/skill.md">skill.md</a>
-        <a class="btn ghost" href="/scripts/agent-mine.js">agent-mine.js</a>
-        <a class="btn ghost" href="/scripts/agent_mine.py">agent_mine.py</a>
-      </div>
-      <pre style="background:#070d18;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;color:#b7c3df;font-size:.78rem;margin:12px 0 0">CONTRACT=0x… MINTER=0x… node scripts/agent-mine.js
-# then freeMint(nonce) value=miningFeeWei on BSC</pre>
+      <p style="margin:0 0 8px;color:var(--muted)">NFT contract</p>
+      <p class="addr" id="contractDisplay">Not deployed yet — mint opens soon</p>
+      <p style="margin:14px 0 8px;color:var(--muted)">Agent ID registry</p>
+      <p class="addr">0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F</p>
     </div>
   </section>
 
   <section class="wrap" id="mint">
-    <h2>Mint console</h2>
+    <h2>Browser miner</h2>
     <div class="card">
       <div class="soon" id="mintSoon">Mint opens soon — paste contract address after deploy</div>
+      <div class="live" id="mintLive">Contract loaded</div>
+      <p style="color:var(--muted);line-height:1.45;margin:0 0 10px">Manual option if you prefer MetaMask / injected wallet. Same Agent ID gate and PoW rules.</p>
       <div class="row" style="justify-content:space-between">
         <button class="btn ghost" id="btnConnect" type="button">Connect Wallet</button>
         <span id="walletLabel" style="color:var(--muted);font-size:.88rem">Wallet: not connected</span>
       </div>
       <label for="contractAddr">Contract address</label>
-      <input id="contractAddr" placeholder="0x… (unset = mint opens soon)" autocomplete="off" />
+      <input id="contractAddr" placeholder="0x… (auto-filled from config when live)" autocomplete="off" />
       <div class="row">
         <button class="btn ghost" id="btnLoad" type="button">Load contract</button>
         <span id="phaseLabel" style="color:var(--muted);font-size:.88rem">Phase: —</span>
@@ -155,7 +221,7 @@
   <section class="wrap faq" id="faq">
     <h2>FAQ</h2>
     <details open><summary>Who can mint?</summary><p>Only Binance Agentic Wallets holding SPACE ID Agent ID. EOAs only.</p></details>
-    <details><summary>AI agents?</summary><p>Yes — see <a href="/agent.md">agent.md</a> and the miner scripts. Same gate + PoW rules.</p></details>
+    <details open><summary>How does AI agent mint work?</summary><p>Copy the mint prompt, paste it to your agent. It follows <a href="/skill.md">skill.md</a>, mines PoW, shows a preview, and waits for your confirm. Never share keys on this site.</p></details>
     <details><summary>Airdrop?</summary><p>All DropMinters holders (free and paid mint) will receive a future airdrop from the creator.</p></details>
   </section>
 
@@ -164,7 +230,7 @@
   </div></footer>
 
   <script>
-  // ethers loaded ONLY on connect — keeps first paint light
+  const CFG = window.DROPMINTERS || {};
   const ABI = [
     "function challenge() view returns (bytes32)",
     "function difficultyTarget() view returns (uint256)",
@@ -178,15 +244,80 @@
     "function paidMint(uint256 quantity) payable",
     "function isAgent(address) view returns (bool)",
     "function agentGateEnabled() view returns (bool)",
+    "function totalSupply() view returns (uint256)",
   ];
   let ethersLib=null, provider, signer, contract, worker, foundNonce=null;
   const logEl=document.getElementById('log');
   const log=m=>{logEl.textContent+=m+"\n";logEl.scrollTop=logEl.scrollHeight};
-  const setSoon=open=>{
-    document.getElementById('heroSoon').style.display=open?'none':'inline-block';
-    document.getElementById('mintSoon').style.display=open?'none':'inline-block';
-  };
-  setSoon(false);
+
+  function contractLive(){
+    const a=(CFG.CONTRACT_ADDRESS||"").trim();
+    return /^0x[a-fA-F0-9]{40}$/.test(a);
+  }
+  function setSoon(open){
+    ['heroSoon','agentSoon','mintSoon'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.style.display=open?'none':'inline-block';
+    });
+    ['heroLive','agentLive','mintLive'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.style.display=open?'inline-block':'none';
+    });
+  }
+
+  function buildPrompt(){
+    const site=CFG.SITE_URL||'https://dropminters.surge.sh';
+    const skill=CFG.SKILL_URL||(site+'/skill.md');
+    const gate=CFG.AGENT_ID_NFT||'0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F';
+    const fee=CFG.MINING_FEE_BNB||'0.0003';
+    const price=CFG.MINT_PRICE_BNB||'0.003';
+    const addr=contractLive()?CFG.CONTRACT_ADDRESS.trim():'(read CONTRACT_ADDRESS from '+site+'/config.js — if empty, mint opens soon and stop)';
+    return [
+      'Mint 1 DropMinters NFT on BNB Chain (chainId 56) using free proof-of-work mint.',
+      'Read and follow '+skill+' (also '+site+'/agent.md and '+site+'/llms.txt).',
+      'Config: '+site+'/config.js — NFT contract: '+addr+'.',
+      'Agent ID registry (must hold balance > 0): '+gate+'.',
+      'Rules: EOAs only; 1 free mint per wallet; mining fee '+fee+' BNB (confirm live miningFee()); paid mint optional at '+price+' BNB max 2.',
+      'Steps: verify Agent ID on-chain; read challenge + difficultyTarget + miningFee; mine nonce so keccak256(abi.encodePacked(minter, nonce, challenge)) < difficultyTarget (use '+site+'/scripts/agent-mine.js if helpful); call freeMint(nonce) with value=miningFee only.',
+      'Safety: never approve / permit / setApprovalForAll; never swap or bridge; show a transaction preview and wait for my confirmation before signing.',
+      'Remind me that all DropMinters holders get a future airdrop from the creator.'
+    ].join(' ');
+  }
+
+  function refreshPromptUI(){
+    const live=contractLive();
+    setSoon(live);
+    document.getElementById('promptBox').textContent=buildPrompt();
+    document.getElementById('gateAddr').textContent=CFG.AGENT_ID_NFT||'';
+    const disp=document.getElementById('contractDisplay');
+    if(live){
+      disp.textContent=CFG.CONTRACT_ADDRESS.trim();
+      const input=document.getElementById('contractAddr');
+      if(input && !input.value) input.value=CFG.CONTRACT_ADDRESS.trim();
+    } else {
+      disp.textContent='Not deployed yet — mint opens soon';
+    }
+    const max=CFG.MAX_SUPPLY||1111;
+    document.getElementById('mintProgressText').textContent='0 / '+max.toLocaleString()+' minted';
+    document.getElementById('mintProgressPct').textContent='0.0%';
+    document.getElementById('mintRemaining').textContent='Remaining: '+max.toLocaleString();
+    document.getElementById('mintProgressBar').style.width='0%';
+  }
+
+  function copyText(t, el, ok){
+    const done=()=>{el.textContent=ok||'Copied'; setTimeout(()=>{el.textContent='';},2200)};
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(done).catch(()=>{el.textContent='Copy failed — select the prompt manually';});
+    } else {
+      try{
+        const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta); done();
+      }catch(e){el.textContent='Copy failed — select the prompt manually';}
+    }
+  }
+
+  document.getElementById('copyMintPrompt').onclick=()=>copyText(buildPrompt(), document.getElementById('mintPromptCopied'), 'Copied — paste to your agent');
+  document.getElementById('copySkillLink').onclick=()=>copyText(CFG.SKILL_URL||'https://dropminters.surge.sh/skill.md', document.getElementById('mintPromptCopied'), 'Skill URL copied');
+
+  refreshPromptUI();
 
   function loadEthers(){
     if(ethersLib) return Promise.resolve(ethersLib);
@@ -212,25 +343,33 @@
 
   async function loadContract(){
     const ethers=await loadEthers();
-    const addr=document.getElementById('contractAddr').value.trim();
+    let addr=document.getElementById('contractAddr').value.trim();
+    if(!addr && contractLive()) addr=CFG.CONTRACT_ADDRESS.trim();
     if(!ethers.isAddress(addr)){setSoon(false);alert('Paste a valid contract when mint opens');return}
     if(!signer) await connect();
     contract=new ethers.Contract(addr,ABI,signer);
     setSoon(true);
     document.getElementById('btnMine').disabled=false;
     document.getElementById('btnPaid').disabled=false;
+    document.getElementById('contractDisplay').textContent=addr;
     await refresh(); log('Loaded '+addr);
   }
 
   async function refresh(){
     const ethers=ethersLib;
-    const [freeActive,paidActive,remFree,remPaid,fee,price]=await Promise.all([
-      contract.freeMintActive(),contract.paidMintActive(),contract.remainingFree(),contract.remainingPaid(),contract.miningFee(),contract.mintPrice()]);
+    const [freeActive,paidActive,remFree,remPaid,fee,price,supply]=await Promise.all([
+      contract.freeMintActive(),contract.paidMintActive(),contract.remainingFree(),contract.remainingPaid(),contract.miningFee(),contract.mintPrice(),contract.totalSupply()]);
     document.getElementById('phaseLabel').textContent=`Phase: free=${freeActive} paid=${paidActive}`;
     const me=await signer.getAddress();
     const [isAg,gateOn]=await Promise.all([contract.isAgent(me),contract.agentGateEnabled()]);
     document.getElementById('statsLabel').textContent=
       `Free left: ${remFree} · Fee: ${ethers.formatEther(fee)} BNB · Paid: ${ethers.formatEther(price)} BNB · Paid left: ${remPaid} · Agent: ${isAg?'YES':'NO'} (gate ${gateOn?'ON':'OFF'})`;
+    const max=CFG.MAX_SUPPLY||1111;
+    const total=Number(supply);
+    document.getElementById('mintProgressText').textContent=total.toLocaleString()+' / '+max.toLocaleString()+' minted';
+    document.getElementById('mintProgressPct').textContent=((total/max)*100).toFixed(1)+'%';
+    document.getElementById('mintRemaining').textContent='Remaining: '+(max-total).toLocaleString();
+    document.getElementById('mintProgressBar').style.width=((total/max)*100)+'%';
   }
 
   function startMine(){
