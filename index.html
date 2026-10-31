@@ -74,8 +74,8 @@
     <div class="row" style="margin:0">
       <a class="btn ghost" href="#agent" style="padding:8px 12px;font-size:.85rem">AI Agent</a>
       <a class="btn ghost" href="#mint" style="padding:8px 12px;font-size:.85rem">Browser</a>
-      <a class="btn ghost" href="https://x.com/DropMinters" target="_blank" rel="noopener" style="padding:8px 12px;font-size:.85rem">X</a>
-    </div>
+      <a class="btn ghost" href="#safety" style="padding:8px 12px;font-size:.85rem">Safety</a>
+</div>
   </div></nav>
 
   <header class="wrap hero">
@@ -218,6 +218,46 @@
     </div>
   </section>
 
+
+  <section class="wrap" id="safety">
+    <h2>Safety check</h2>
+    <div class="card">
+      <p style="color:var(--muted);line-height:1.5;margin:0 0 12px">Facts only — independently verify before you mint. This page does not ask you to trust us; it tells you what the contract does and how to check it yourself.</p>
+      <div class="price-rows">
+        <div class="pr"><span>Contract</span><span class="addr" id="safetyContract">— (set after deploy)</span></div>
+        <div class="pr"><span>BscScan</span><span id="safetyBsc"><a href="#" id="safetyBscLink">—</a></span></div>
+        <div class="pr"><span>Owner / payout / royalty receiver</span><span class="addr">0xF159CD2739E76fcbA210cB22Ac34cc39a9D4Bd87</span></div>
+        <div class="pr"><span>Chain</span><span>BNB Smart Chain · chainId 56</span></div>
+      </div>
+      <h3 style="margin:16px 0 8px">What a mint call does</h3>
+      <ul style="color:var(--muted);line-height:1.55;margin:0;padding-left:18px">
+        <li><code>freeMint(uint256 nonce)</code> — payable; <code>msg.value</code> must be at least <code>miningFee</code> (default <b>0.0003 BNB</b>). Mines PoW against on-chain <code>challenge</code> / <code>difficultyTarget</code>. 1 free mint per wallet. Overpay is refunded.</li>
+        <li><code>paidMint(uint256 quantity)</code> — payable; <code>msg.value = mintPrice * quantity</code> (default <b>0.003 BNB</b> each, max 2 / wallet). Paid phase starts off until owner enables it.</li>
+        <li>Both free and paid mint require a SPACE ID Agent ID NFT balance and an EOA caller (<code>msg.sender == tx.origin</code>).</li>
+      </ul>
+      <h3 style="margin:16px 0 8px">What it never asks for</h3>
+      <p style="color:var(--muted);line-height:1.5;margin:0">The mint path does <b>not</b> call or require <code>approve</code>, <code>permit</code>, <code>setApprovalForAll</code>, or any other token allowance. Do not sign any allowance for this mint.</p>
+      <h3 style="margin:16px 0 8px">Owner-only functions (from source)</h3>
+      <p style="color:var(--muted);line-height:1.5;margin:0 0 8px">Only the Ownable owner (<code>0xF159…4Bd87</code>) can call:</p>
+      <ul style="color:var(--muted);line-height:1.55;margin:0;padding-left:18px;font-size:.9rem">
+        <li><code>ownerMint(to, quantity)</code> — reserve ≤100, bypasses Agent gate</li>
+        <li><code>setFreeMintActive</code> / <code>setPaidMintActive</code></li>
+        <li><code>setDifficulty</code> / <code>setMiningFee</code> / <code>setMintPrice</code></li>
+        <li><code>setAgentIdNft</code> / <code>setAgentGateEnabled</code></li>
+        <li><code>setUnrevealedURI</code> / <code>setBaseURI</code> / <code>reveal</code></li>
+        <li><code>bumpChallenge</code> / <code>setDefaultRoyalty</code> / <code>withdraw</code></li>
+        <li>Ownable: <code>transferOwnership</code> / <code>renounceOwnership</code></li>
+      </ul>
+      <h3 style="margin:16px 0 8px">Verify this contract yourself</h3>
+      <p style="color:var(--muted);line-height:1.45;margin:0 0 8px">Copy this prompt to any AI agent. It must read the verified source independently and report what it finds — including risks. Do not ask it to rubber-stamp “safe”.</p>
+      <div class="prompt-box" id="verifyPrompt"></div>
+      <div class="copy-row">
+        <button class="btn cyan" type="button" id="btnCopyVerify">Copy verify prompt</button>
+        <span class="copied" id="verifyCopied" aria-live="polite"></span>
+      </div>
+    </div>
+  </section>
+
   <section class="wrap faq" id="faq">
     <h2>FAQ</h2>
     <details open><summary>Who can mint?</summary><p>Only Binance Agentic Wallets holding SPACE ID Agent ID. EOAs only.</p></details>
@@ -225,7 +265,7 @@
     <details><summary>Airdrop?</summary><p>All DropMinters holders (free and paid mint) will receive a future airdrop from the creator.</p></details>
   </section>
 
-  <footer><div class="wrap">DropMinters · BNB Chain · MIT · <a href="https://x.com/DropMinters" target="_blank" rel="noopener">@DropMinters</a>
+  <footer><div class="wrap">DropMinters · BNB Chain · MIT
     <div style="margin-top:6px;font-size:.8rem">Not financial advice. Built by DropMinters.</div>
   </div></footer>
 
@@ -262,6 +302,36 @@
       const el=document.getElementById(id); if(el) el.style.display=open?'inline-block':'none';
     });
   }
+
+
+  function buildVerifyPrompt(){
+    const site=CFG.SITE_URL||'https://dropminters.surge.sh';
+    const addr=contractLive()?CFG.CONTRACT_ADDRESS.trim():'(CONTRACT_ADDRESS from '+site+'/config.js)';
+    const bsc=contractLive()?('https://bscscan.com/address/'+CFG.CONTRACT_ADDRESS.trim()+'#code'):'(BscScan link after deploy)';
+    return [
+      'Independently audit the DropMinters NFT contract on BNB Chain.',
+      'Contract: '+addr,
+      'BscScan verified source (or Sourcify): '+bsc,
+      'Also read the project docs: '+site+'/skill.md , '+site+'/agent.md , and the Solidity at the GitHub org dropminters if needed.',
+      'Do your own reading of the verified source. Report: what freeMint(nonce) and paidMint(qty) do; exact msg.value expected; whether any approve/permit/setApprovalForAll path exists for minting; who the owner is and every onlyOwner function; supply caps; Agent ID gate; royalty; withdraw; and any risks, footguns, or mismatches vs the docs.',
+      'Be factual. Do not rubber-stamp the contract as safe or zero-risk. List concrete findings and residual risks so a human can decide.'
+    ].join('\\n');
+  }
+  function fillSafety(){
+    const sc=document.getElementById('safetyContract');
+    const link=document.getElementById('safetyBscLink');
+    const box=document.getElementById('verifyPrompt');
+    if(box) box.textContent=buildVerifyPrompt();
+    if(contractLive()){
+      const a=CFG.CONTRACT_ADDRESS.trim();
+      if(sc) sc.textContent=a;
+      if(link){ link.href='https://bscscan.com/address/'+a+'#code'; link.textContent='bscscan.com/address/'+a+'#code'; link.target='_blank'; link.rel='noopener'; }
+    }
+  }
+  document.getElementById('btnCopyVerify')?.addEventListener('click', async ()=>{
+    const text=buildVerifyPrompt();
+    try{ await navigator.clipboard.writeText(text); document.getElementById('verifyCopied').textContent='Copied'; setTimeout(()=>document.getElementById('verifyCopied').textContent='',1800);}catch(e){ document.getElementById('verifyCopied').textContent='Copy failed'; }
+  });
 
   function buildPrompt(){
     const site=CFG.SITE_URL||'https://dropminters.surge.sh';
@@ -431,6 +501,7 @@
   document.getElementById('btnStop').onclick=stopMine;
   document.getElementById('btnFreeMint').onclick=doFreeMint;
   document.getElementById('btnPaid').onclick=doPaidMint;
+  fillSafety();
   </script>
 </body>
 </html>

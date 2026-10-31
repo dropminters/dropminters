@@ -2,7 +2,7 @@
    Set CONTRACT_ADDRESS after deploy; leave "" while mint is closed. */
 window.DROPMINTERS = {
   SITE_URL: "https://dropminters.surge.sh",
-  CONTRACT_ADDRESS: "", // set after deploy, e.g. "0x..."
+  CONTRACT_ADDRESS: "0x74a404da754a80818c7c896de13c74f6ac17f6a3",
   AGENT_ID_NFT: "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F",
   CHAIN_ID: 56,
   CHAIN_NAME: "BNB Smart Chain",
@@ -15,7 +15,6 @@ window.DROPMINTERS = {
   MAX_PAID_PER_WALLET: 2,
   FREE_PER_WALLET: 1,
   ROYALTY_BPS: 500,
-  X_HANDLE: "https://x.com/DropMinters",
   SKILL_URL: "https://dropminters.surge.sh/skill.md",
   AGENT_URL: "https://dropminters.surge.sh/agent.md",
   LLMS_URL: "https://dropminters.surge.sh/llms.txt"

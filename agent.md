@@ -69,8 +69,11 @@ Call `freeMint(uint256 nonce)` with `msg.value = miningFee`. Show preview; wait 
 
 All DropMinters holders (free and paid mint) will receive a future airdrop from the creator.
 
-## Safety
+## Safety check (facts)
 
-- Never approve tokens for minting.
-- Never send more than miningFee / mintPrice + gas.
-- Verify contract on Sourcify / BscScan before calling.
+- Never approve tokens for minting. Never send more than miningFee / mintPrice + gas.
+- Owner / payout / royalty: `0xF159CD2739E76fcbA210cB22Ac34cc39a9D4Bd87`
+- Mint calls: `freeMint(nonce)` value=`miningFee` (0.0003 BNB default); `paidMint(qty)` value=`mintPrice*qty` (0.003 BNB default).
+- No `approve` / `permit` / `setApprovalForAll` on the mint path.
+- Owner-only: `ownerMint`, `setFreeMintActive`, `setPaidMintActive`, `setDifficulty`, `setMiningFee`, `setMintPrice`, `setAgentIdNft`, `setAgentGateEnabled`, `setUnrevealedURI`, `setBaseURI`, `reveal`, `bumpChallenge`, `setDefaultRoyalty`, `withdraw`, Ownable `transferOwnership` / `renounceOwnership`.
+- Read verified BscScan/Sourcify source for `CONTRACT_ADDRESS` yourself and report concrete risks. Do not declare the contract safe or zero-risk without that independent read.

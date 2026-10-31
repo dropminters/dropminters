@@ -53,3 +53,12 @@ Call `paidMint(uint256 quantity)` with `value = mintPrice * quantity`, quantity 
 ## Example user prompt (paste-ready)
 
 Mint 1 DropMinters NFT on BNB Chain. Read and follow https://dropminters.surge.sh/skill.md. Check config.js for CONTRACT_ADDRESS. Verify Agent ID gate 0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F. Mine PoW nonce, call freeMint with miningFee only, never approve tokens, show preview, wait for my confirmation.
+
+
+## Safety check (facts)
+
+- Owner / payout / 5% royalty receiver: `0xF159CD2739E76fcbA210cB22Ac34cc39a9D4Bd87`
+- Free mint: `freeMint(nonce)` with `msg.value = miningFee` (default 0.0003 BNB). No `approve` / `permit` / `setApprovalForAll`.
+- Paid mint: `paidMint(qty)` with `msg.value = mintPrice * qty` (default 0.003 BNB), max 2.
+- Owner-only: `ownerMint`, `setFreeMintActive`, `setPaidMintActive`, `setDifficulty`, `setMiningFee`, `setMintPrice`, `setAgentIdNft`, `setAgentGateEnabled`, `setUnrevealedURI`, `setBaseURI`, `reveal`, `bumpChallenge`, `setDefaultRoyalty`, `withdraw`, plus Ownable `transferOwnership` / `renounceOwnership`.
+- Independently read the verified BscScan/Sourcify source for `CONTRACT_ADDRESS` and report risks yourself. Do not rubber-stamp “safe” or “zero risk”.
