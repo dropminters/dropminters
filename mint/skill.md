@@ -32,7 +32,7 @@ Use this skill when a user asks you to mint a DropMinters NFT on BNB Chain (Bina
 | Free mining fee | 0.0005 BNB (read live `miningFee()`) |
 | Agent gate | SPACE ID Agent ID NFT `0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F` |
 | Caller | EOA only (`msg.sender == tx.origin`) |
-| Airdrop | All holders (free and paid) get a future airdrop from the creator |
+| Airdrop | Every DropMinters holder wallet receives 10,000 $DROP tokens |
 
 ## Free mint steps
 
@@ -62,3 +62,7 @@ Mint 1 DropMinters NFT on BNB Chain. Read and follow https://dropminters.surge.s
 - Paid mint: `paidMint(qty)` with `msg.value = mintPrice * qty` (default 0.005 BNB), max 2.
 - Owner-only: `ownerMint`, `setFreeMintActive`, `setPaidMintActive`, `setDifficulty`, `setMiningFee`, `setMintPrice`, `setAgentIdNft`, `setAgentGateEnabled`, `setUnrevealedURI`, `setBaseURI`, `reveal`, `bumpChallenge`, `setDefaultRoyalty`, `withdraw`, plus Ownable `transferOwnership` / `renounceOwnership`.
 - Independently read the verified BscScan/Sourcify source for `CONTRACT_ADDRESS` and report risks yourself. Do not rubber-stamp “safe” or “zero risk”.
+
+## Airdrop
+
+Every DropMinters holder wallet receives 10,000 $DROP tokens.

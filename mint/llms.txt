@@ -39,3 +39,7 @@ freeMint(nonce) value=miningFee (0.0005 BNB). paidMint(qty) value=mintPrice*qty 
 No approve/permit/setApprovalForAll for mint.
 Owner-only: ownerMint, setFreeMintActive, setPaidMintActive, setDifficulty, setMiningFee, setMintPrice, setAgentIdNft, setAgentGateEnabled, setUnrevealedURI, setBaseURI, reveal, bumpChallenge, setDefaultRoyalty, withdraw, transferOwnership, renounceOwnership.
 Independently read verified source on BscScan; report risks; do not rubber-stamp safe.
+
+## Airdrop
+
+Every DropMinters holder wallet receives 10,000 $DROP tokens.

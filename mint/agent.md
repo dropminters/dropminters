@@ -67,7 +67,7 @@ Call `freeMint(uint256 nonce)` with `msg.value = miningFee`. Show preview; wait 
 
 ## Airdrop
 
-All DropMinters holders (free and paid mint) will receive a future airdrop from the creator.
+Every DropMinters holder wallet receives 10,000 $DROP tokens.
 
 ## Safety check (facts)
 
