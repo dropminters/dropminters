@@ -66,6 +66,21 @@
     .bar{height:10px;background:#0a1020;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:10px 0 8px}
     .bar>div{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .5s ease}
     .bar-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+    .airdrop{margin-top:14px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,rgba(243,186,47,.14),rgba(60,240,197,.08));border:1px solid rgba(243,186,47,.35);color:#ffe9b0;line-height:1.45;font-weight:650}
+    .contract-card{display:grid;gap:12px}
+    @media(min-width:720px){.contract-card{grid-template-columns:1.2fr .8fr}}
+    .contract-card .label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:700}
+    .contract-card .linkrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .contract-card a.btn{padding:8px 12px;font-size:.82rem}
+    nav .inner{padding:12px 0}
+    .hero{padding:42px 0 28px}
+    .hero .lead b{color:var(--text)}
+    section{padding:22px 0}
+    h2{letter-spacing:-.02em}
+    .btn{transition:transform .12s ease,opacity .12s ease}
+    .btn:hover{transform:translateY(-1px)}
+    footer{padding:28px 0 48px}
   </style>
 </head>
 <body>
@@ -85,6 +100,7 @@
       <p class="lead"><b>Only Binance Agent wallets can mint.</b> Copy one prompt to your AI agent — or mine in the browser.
       <b>All DropMinters holders (free and paid) will receive a future airdrop from the creator.</b></p>
       <div class="row"><a class="btn lg" href="#agent">Mint via AI agent</a><a class="btn ghost" href="#mint">Browser miner</a></div>
+      <div class="airdrop">Airdrop promise: every DropMinters holder (free + paid) gets a future airdrop from the creator.</div>
       <div class="soon" id="heroSoon">Mint opens soon — contract not live yet</div>
       <div class="live" id="heroLive">Mint is live</div>
     </div>
@@ -174,12 +190,22 @@
   </section>
 
   <section class="wrap" id="contracts">
-    <h2>Contracts</h2>
-    <div class="card">
-      <p style="margin:0 0 8px;color:var(--muted)">NFT contract</p>
-      <p class="addr" id="contractDisplay">Not deployed yet — mint opens soon</p>
-      <p style="margin:14px 0 8px;color:var(--muted)">Agent ID registry</p>
-      <p class="addr">0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F</p>
+    <h2>Contract</h2>
+    <div class="card contract-card">
+      <div>
+        <p class="label">DropMiners NFT · BNB Chain</p>
+        <p class="addr" id="contractDisplay">Not deployed yet — mint opens soon</p>
+        <div class="linkrow">
+          <a class="btn cyan" id="bscscanBtn" href="#" target="_blank" rel="noopener">Open on BscScan</a>
+          <a class="btn ghost" id="bscscanCodeBtn" href="#" target="_blank" rel="noopener">Verified source</a>
+          <button class="btn ghost" type="button" id="copyContractBtn" style="padding:8px 12px;font-size:.82rem">Copy address</button>
+        </div>
+      </div>
+      <div>
+        <p class="label">Agent ID gate</p>
+        <p class="addr">0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F</p>
+        <p style="color:var(--muted);font-size:.88rem;line-height:1.45;margin:10px 0 0">Must hold SPACE ID Agent ID. EOAs only. Mint never asks for approve / permit / setApprovalForAll.</p>
+      </div>
     </div>
   </section>
 
@@ -360,6 +386,18 @@
     const disp=document.getElementById('contractDisplay');
     if(live){
       disp.textContent=CFG.CONTRACT_ADDRESS.trim();
+
+          const bsc=document.getElementById('bscscanBtn');
+          const bscCode=document.getElementById('bscscanCodeBtn');
+          if(live){
+            const a=CFG.CONTRACT_ADDRESS.trim();
+            if(bsc){ bsc.href='https://bscscan.com/address/'+a; bsc.style.opacity='1'; }
+            if(bscCode){ bscCode.href='https://bscscan.com/address/'+a+'#code'; }
+          } else {
+            if(bsc){ bsc.href='#'; bsc.style.opacity='.5'; }
+            if(bscCode){ bscCode.href='#'; }
+          }
+      
       const input=document.getElementById('contractAddr');
       if(input && !input.value) input.value=CFG.CONTRACT_ADDRESS.trim();
     } else {
@@ -420,7 +458,11 @@
     const ethers=await loadEthers();
     provider=new ethers.BrowserProvider(window.ethereum);
     await provider.send('eth_requestAccounts',[]);
-    try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x38'}]})}catch(e){log('Switch to BSC: '+e.message)}
+    try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x38'}]})}catch(e){
+      if(e && (e.code===4902 || String(e.message||'').includes('Unrecognized'))){
+        try{await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x38',chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:['https://bsc-dataseed.binance.org/'],blockExplorerUrls:['https://bscscan.com/']}]})}catch(e2){log('Add BSC: '+e2.message)}
+      } else { log('Switch to BSC: '+e.message) }
+    }
     signer=await provider.getSigner();
     document.getElementById('walletLabel').textContent='Wallet: '+await signer.getAddress();
     log('Connected');
@@ -501,6 +543,11 @@
   document.getElementById('btnStop').onclick=stopMine;
   document.getElementById('btnFreeMint').onclick=doFreeMint;
   document.getElementById('btnPaid').onclick=doPaidMint;
+  document.getElementById('copyContractBtn')?.addEventListener('click',()=>{
+    const a=contractLive()?CFG.CONTRACT_ADDRESS.trim():(document.getElementById('contractDisplay')?.textContent||'');
+    if(a && a.startsWith('0x')) copyText(a, document.getElementById('mintPromptCopied')||document.getElementById('verifyCopied'), 'Address copied');
+  });
+  // Auto-load when live after first connect is optional; keep manual Load for safety
   fillSafety();
   </script>
 </body>
