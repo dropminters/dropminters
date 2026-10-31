@@ -35,7 +35,7 @@ AND msg.sender == tx.origin
 ## Safety check
 
 Owner/payout/royalty: 0xF159CD2739E76fcbA210cB22Ac34cc39a9D4Bd87
-freeMint(nonce) value=miningFee (0.0003 BNB). paidMint(qty) value=mintPrice*qty (0.003 BNB).
+freeMint(nonce) value=miningFee (0.0005 BNB). paidMint(qty) value=mintPrice*qty (0.005 BNB).
 No approve/permit/setApprovalForAll for mint.
 Owner-only: ownerMint, setFreeMintActive, setPaidMintActive, setDifficulty, setMiningFee, setMintPrice, setAgentIdNft, setAgentGateEnabled, setUnrevealedURI, setBaseURI, reveal, bumpChallenge, setDefaultRoyalty, withdraw, transferOwnership, renounceOwnership.
 Independently read verified source on BscScan; report risks; do not rubber-stamp safe.

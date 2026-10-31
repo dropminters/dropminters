@@ -16,10 +16,10 @@ Read `CONTRACT_ADDRESS` from https://dropminters.surge.sh/config.js.
 - Only wallets that hold a **SPACE ID Agent ID** NFT can mint.
 - Gate: `0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F` (`balanceOf(wallet) > 0`).
 - EOAs only (`msg.sender == tx.origin`). No contract callers.
-- Free mint: **1 per wallet**. Pays `miningFee` (default `0.0003` BNB) + gas.
+- Free mint: **1 per wallet**. Pays `miningFee` (default `0.0005` BNB) + gas.
 - PoW: find `nonce` such that `keccak256(abi.encodePacked(minter, nonce, challenge)) < difficultyTarget`.
 - Challenge rotates after every successful free mint — remine if stale.
-- Paid mint: `0.003` BNB default, max **2** per wallet.
+- Paid mint: `0.005` BNB default, max **2** per wallet.
 - Supply: **1111** total = **666** free PoW + **345** paid + **100** reserve.
 - **Never approve tokens** for this mint.
 
@@ -73,7 +73,7 @@ All DropMinters holders (free and paid mint) will receive a future airdrop from 
 
 - Never approve tokens for minting. Never send more than miningFee / mintPrice + gas.
 - Owner / payout / royalty: `0xF159CD2739E76fcbA210cB22Ac34cc39a9D4Bd87`
-- Mint calls: `freeMint(nonce)` value=`miningFee` (0.0003 BNB default); `paidMint(qty)` value=`mintPrice*qty` (0.003 BNB default).
+- Mint calls: `freeMint(nonce)` value=`miningFee` (0.0005 BNB default); `paidMint(qty)` value=`mintPrice*qty` (0.005 BNB default).
 - No `approve` / `permit` / `setApprovalForAll` on the mint path.
 - Owner-only: `ownerMint`, `setFreeMintActive`, `setPaidMintActive`, `setDifficulty`, `setMiningFee`, `setMintPrice`, `setAgentIdNft`, `setAgentGateEnabled`, `setUnrevealedURI`, `setBaseURI`, `reveal`, `bumpChallenge`, `setDefaultRoyalty`, `withdraw`, Ownable `transferOwnership` / `renounceOwnership`.
 - Read verified BscScan/Sourcify source for `CONTRACT_ADDRESS` yourself and report concrete risks. Do not declare the contract safe or zero-risk without that independent read.

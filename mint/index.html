@@ -121,8 +121,8 @@
   <section class="wrap" id="stats">
     <div class="stats">
       <div class="statcard"><p class="k">Supply</p><div class="v">1111</div><div class="s">Total unique NFTs</div></div>
-      <div class="statcard"><p class="k">Free PoW</p><div class="v">666</div><div class="s">1 / wallet · 0.0003 BNB fee</div></div>
-      <div class="statcard"><p class="k">Paid</p><div class="v">345</div><div class="s">0.003 BNB · max 2 / wallet</div></div>
+      <div class="statcard"><p class="k">Free PoW</p><div class="v">666</div><div class="s" id="miningFeeStat">1 / wallet · 0.0005 BNB fee</div></div>
+      <div class="statcard"><p class="k">Paid</p><div class="v">345</div><div class="s" id="paidPriceStat">0.005 BNB · max 2 / wallet</div></div>
       <div class="statcard"><p class="k">Royalty</p><div class="v">5%</div><div class="s">ERC-2981 to owner</div></div>
     </div>
     <div class="card" style="margin-top:12px">
@@ -144,7 +144,7 @@
         <div class="steps" style="margin-top:12px">
           <div class="step"><div class="n">1</div><p>Hold SPACE ID Agent ID on BNB Chain</p></div>
           <div class="step"><div class="n">2</div><p>Connect wallet → Load contract → Start mining</p></div>
-          <div class="step"><div class="n">3</div><p>When a nonce is found, mint with fee 0.0003 BNB + gas</p></div>
+          <div class="step"><div class="n">3</div><p>When a nonce is found, mint with live <code>miningFee</code> + gas (fallback 0.0005 BNB)</p></div>
         </div>
         <div class="row"><a class="btn cyan sm" href="#mint">Open browser miner</a></div>
       </div>
@@ -251,8 +251,8 @@
       </div>
       <h3 style="margin:16px 0 8px">Mint calls</h3>
       <ul style="color:var(--muted);line-height:1.55;margin:0;padding-left:18px">
-        <li><code>freeMint(nonce)</code> — value ≥ <code>miningFee</code> (default <b>0.0003 BNB</b>), 1 / wallet</li>
-        <li><code>paidMint(qty)</code> — value = <code>mintPrice * qty</code> (default <b>0.003 BNB</b>), max 2</li>
+        <li><code>freeMint(nonce)</code> — value = live <code>miningFee()</code> (fallback <b><span id="safetyMiningFee">0.0005</span> BNB</b>), 1 / wallet</li>
+        <li><code>paidMint(qty)</code> — value = <code>mintPrice * qty</code> (fallback <b><span id="safetyPaidPrice">0.005</span> BNB</b>; always use live <code>mintPrice()</code>), max 2</li>
         <li>Requires Agent ID + EOA (<code>msg.sender == tx.origin</code>)</li>
       </ul>
       <h3 style="margin:16px 0 8px">Never required</h3>
@@ -274,7 +274,7 @@
     <details open><summary>Who can mint?</summary><p>Only wallets holding SPACE ID Agent ID on BNB Chain. EOAs only.</p></details>
     <details open><summary>How does AI agent mint work?</summary><p>Copy the mint prompt, paste to your agent. It follows skill.md, mines PoW, shows a preview, waits for your confirm.</p></details>
     <details open><summary>Airdrop?</summary><p>All DropMinters holders (free and paid) get a future airdrop from the creator.</p></details>
-    <details><summary>What do I pay?</summary><p>Free mint: 0.0003 BNB mining fee + gas. Paid mint (when enabled): 0.003 BNB each, max 2 per wallet.</p></details>
+    <details><summary>What do I pay?</summary><p>Free mint: <span id="faqMiningFee">0.0005</span> BNB mining fee + gas. Paid mint (when enabled): <span id="faqPaidPrice">0.005</span> BNB each (live from contract when loaded), max 2 per wallet.</p></details>
   </section>
 
   <footer><div class="wrap">DropMinters · BNB Chain · MIT
@@ -341,8 +341,8 @@
     const site=CFG.SITE_URL||'https://dropminters.surge.sh';
     const skill=CFG.SKILL_URL||(site+'/skill.md');
     const gate=CFG.AGENT_ID_NFT||'0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F';
-    const fee=CFG.MINING_FEE_BNB||'0.0003';
-    const price=CFG.MINT_PRICE_BNB||'0.003';
+    const fee=CFG.MINING_FEE_BNB||'0.0005';
+    const price=CFG.MINT_PRICE_BNB||'0.005';
     const addr=contractLive()?CFG.CONTRACT_ADDRESS.trim():'(read CONTRACT_ADDRESS from '+site+'/config.js — if empty, stop)';
     return [
       'Mint 1 DropMinters NFT on BNB Chain (chainId 56) using free proof-of-work mint.',
@@ -497,6 +497,20 @@
     document.getElementById('mintProgressPct').textContent=((total/max)*100).toFixed(1)+'%';
     document.getElementById('mintRemaining').textContent='Remaining: '+(max-total).toLocaleString();
     document.getElementById('mintProgressBar').style.width=((total/max)*100)+'%';
+    const priceBnb=ethers.formatEther(price);
+    const feeBnb=ethers.formatEther(fee);
+    const paidStat=document.getElementById('paidPriceStat');
+    if(paidStat) paidStat.textContent=priceBnb+' BNB · max 2 / wallet';
+    const feeStat=document.getElementById('miningFeeStat');
+    if(feeStat) feeStat.textContent='1 / wallet · '+feeBnb+' BNB fee';
+    const faq=document.getElementById('faqPaidPrice');
+    if(faq) faq.textContent=priceBnb;
+    const faqFee=document.getElementById('faqMiningFee');
+    if(faqFee) faqFee.textContent=feeBnb;
+    const safetyPaid=document.getElementById('safetyPaidPrice');
+    if(safetyPaid) safetyPaid.textContent=priceBnb;
+    const safetyFee=document.getElementById('safetyMiningFee');
+    if(safetyFee) safetyFee.textContent=feeBnb;
   }
 
   function stopMine(){
@@ -557,6 +571,33 @@
     const tx=await contract.paidMint(qty,{value:price*BigInt(qty)});
     log('paid '+tx.hash); await tx.wait(); log('Paid mint done'); await refresh();
   }
+  async function publicPriceRead(){
+    try{
+      const ethers=await loadEthers();
+      const addr=(CFG.CONTRACT_ADDRESS||'').trim();
+      if(!ethers.isAddress(addr)) return;
+      const read=new ethers.Contract(addr,['function mintPrice() view returns (uint256)','function miningFee() view returns (uint256)'], new ethers.JsonRpcProvider('https://bsc-dataseed.binance.org/',56));
+      const [price,fee]=await Promise.all([read.mintPrice(), read.miningFee()]);
+      const priceBnb=ethers.formatEther(price);
+      const feeBnb=ethers.formatEther(fee);
+      const paidStat=document.getElementById('paidPriceStat');
+      if(paidStat) paidStat.textContent=priceBnb+' BNB · max 2 / wallet';
+      const feeStat=document.getElementById('miningFeeStat');
+      if(feeStat) feeStat.textContent='1 / wallet · '+feeBnb+' BNB fee';
+      const faq=document.getElementById('faqPaidPrice');
+      if(faq) faq.textContent=priceBnb;
+      const faqFee=document.getElementById('faqMiningFee');
+      if(faqFee) faqFee.textContent=feeBnb;
+      const safetyPaid=document.getElementById('safetyPaidPrice');
+      if(safetyPaid) safetyPaid.textContent=priceBnb;
+      const safetyFee=document.getElementById('safetyMiningFee');
+      if(safetyFee) safetyFee.textContent=feeBnb;
+      CFG.MINT_PRICE_BNB=priceBnb;
+      CFG.MINING_FEE_BNB=feeBnb;
+      refreshPromptUI();
+    }catch(e){ console.warn('publicPriceRead', e); }
+  }
+  publicPriceRead();
   document.getElementById('btnConnect').onclick=connect;
   document.getElementById('btnLoad').onclick=loadContract;
   document.getElementById('btnMine').onclick=startMine;
