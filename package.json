@@ -1,0 +1,27 @@
+{
+  "name": "nft-collection",
+  "version": "1.0.0",
+  "description": "BNB Chain ERC-721A NFT. Free PoW mint for Binance Agent wallets only.",
+  "main": "config.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dropminters/dropminters.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dropminters/dropminters/issues"
+  },
+  "homepage": "https://github.com/dropminters/dropminters#readme",
+  "dependencies": {
+    "ethers": "^6.13.0"
+  }
+}

@@ -2,6 +2,7 @@
    Set CONTRACT_ADDRESS after deploy; leave "" while mint is closed. */
 window.DROPMINTERS = {
   SITE_URL: "https://dropminters.surge.sh",
+  DROP_TOKEN: "0x5C55A1dA8CDe3Bb0712Dc265251e1ab01e40D1cc",
   CONTRACT_ADDRESS: "0x74a404da754a80818c7c896de13c74f6ac17f6a3",
   AGENT_ID_NFT: "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F",
   CHAIN_ID: 56,

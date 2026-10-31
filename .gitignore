@@ -1,1 +1,9 @@
 node_modules/
+.deploy-tmp/
+out/
+cache/
+broadcast/
+lib/
+.env
+.env.*
+*.log

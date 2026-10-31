@@ -67,7 +67,7 @@ Call `freeMint(uint256 nonce)` with `msg.value = miningFee`. Show preview; wait 
 
 ## Airdrop
 
-Every DropMinters holder wallet receives 10,000 $DROP tokens.
+Every DropMinters holder wallet receives 10,000 $DROP tokens, sent automatically after mint. $DROP: `0x5C55A1dA8CDe3Bb0712Dc265251e1ab01e40D1cc`.
 
 ## Safety check (facts)
 

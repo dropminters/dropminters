@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DropMinters — Agent-gated PoW mint on BNB Chain</title>
-  <meta name="description" content="DropMinters: 1111 Agent-gated NFTs on BNB Chain. Free PoW mint for Binance Agent wallets. Every DropMinters holder wallet receives 10,000 $DROP tokens." />
+  <meta name="description" content="DropMinters: 1111 Agent-gated NFTs on BNB Chain. Free PoW mint for Binance Agent wallets. Every DropMinters holder wallet receives 10,000 $DROP tokens, sent automatically after mint." />
   <meta property="og:title" content="DropMinters" />
   <meta property="og:description" content="Free PoW mint for Binance Agent wallets on BNB Chain. 10,000 $DROP airdrop per holder wallet." />
   <meta property="og:image" content="assets/webp/banner.webp" />
@@ -94,12 +94,12 @@
       <span class="pill">BNB Chain</span><span class="pill">1111 supply</span><span class="pill">Agent-gated</span><span class="pill">5% royalty</span>
       <h1>Mine your <span>DropMinter</span></h1>
       <p class="lead"><b>Only Binance Agent wallets can mint.</b> Proof-of-work free mint, or paid mint when enabled.
-      <b>Every DropMinters holder wallet receives 10,000 $DROP tokens.</b></p>
+      <b>Every DropMinters holder wallet receives 10,000 $DROP tokens, sent automatically after mint.</b></p>
       <div class="row" style="margin:0">
         <a class="btn lg" href="#agent">Mint via AI agent</a>
         <a class="btn ghost lg" href="#mint">Browser miner</a>
       </div>
-      <div class="airdrop">Airdrop: Every DropMinters holder wallet receives 10,000 $DROP tokens.</div>
+      <div class="airdrop">Airdrop: Every DropMinters holder wallet receives <b>10,000 $DROP</b> tokens, sent automatically after mint.<br/><span style="font-weight:500;opacity:.9">$DROP: <span class="addr" id="dropTokenAddr">0x5C55A1dA8CDe3Bb0712Dc265251e1ab01e40D1cc</span></span></div>
       <div class="soon" id="heroSoon">Mint opens soon</div>
       <div class="live" id="heroLive">Mint is live on BNB Chain</div>
     </div>
@@ -180,7 +180,7 @@
         <a class="btn ghost sm" href="/llms.txt">llms.txt</a>
         <a class="btn ghost sm" href="/config.js">config.js</a>
       </div>
-      <div class="okbox"><b>Airdrop:</b> Every DropMinters holder wallet receives 10,000 $DROP tokens.</div>
+      <div class="okbox"><b>Airdrop:</b> Every DropMinters holder wallet receives 10,000 $DROP tokens, sent automatically after mint.</div>
       <div class="warn"><b>Gate:</b> Agent ID <span class="addr" id="gateAddr">0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F</span> · EOA only · Never approve tokens</div>
     </div>
   </section>
@@ -273,7 +273,7 @@
     <h2>FAQ</h2>
     <details open><summary>Who can mint?</summary><p>Only wallets holding SPACE ID Agent ID on BNB Chain. EOAs only.</p></details>
     <details open><summary>How does AI agent mint work?</summary><p>Copy the mint prompt, paste to your agent. It follows skill.md, mines PoW, shows a preview, waits for your confirm.</p></details>
-    <details open><summary>Airdrop?</summary><p>Every DropMinters holder wallet receives 10,000 $DROP tokens.</p></details>
+    <details open><summary>Airdrop?</summary><p>Every DropMinters holder wallet receives 10,000 $DROP tokens, sent automatically after mint. Token: <code>0x5C55A1dA8CDe3Bb0712Dc265251e1ab01e40D1cc</code></p></details>
     <details><summary>What do I pay?</summary><p>Free mint: <span id="faqMiningFee">0.0005</span> BNB mining fee + gas. Paid mint (when enabled): <span id="faqPaidPrice">0.005</span> BNB each (live from contract when loaded), max 2 per wallet.</p></details>
   </section>
 
@@ -283,6 +283,8 @@
 
   <script>
   const CFG = window.DROPMINTERS || {};
+    // DROP_TOKEN fill
+    (function(){const el=document.getElementById('dropTokenAddr'); if(el && CFG.DROP_TOKEN) el.textContent=CFG.DROP_TOKEN;})();
   const ABI = [
     "function challenge() view returns (bytes32)",
     "function difficultyTarget() view returns (uint256)",
@@ -352,7 +354,7 @@
       'Rules: EOAs only; 1 free mint per wallet; mining fee '+fee+' BNB (confirm live miningFee()); paid mint optional at '+price+' BNB max 2.',
       'Steps: verify Agent ID on-chain; read challenge + difficultyTarget + miningFee; mine nonce so keccak256(abi.encodePacked(minter, nonce, challenge)) < difficultyTarget (use '+site+'/scripts/agent-mine.js if helpful); call freeMint(nonce) with value=miningFee only.',
       'Safety: never approve / permit / setApprovalForAll; never swap or bridge; show a transaction preview and wait for my confirmation before signing.',
-      'Remind me: Every DropMinters holder wallet receives 10,000 $DROP tokens.'
+      'Remind me: Every DropMinters holder wallet receives 10,000 $DROP tokens, sent automatically after mint.'
     ].join(' ');
   }
 
